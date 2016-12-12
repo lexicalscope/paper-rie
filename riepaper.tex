@@ -712,29 +712,12 @@ For most high level languages, two procedures are equivalent if they transform a
 
 In this work, we present RIE, a refined methodology to modularly establish equivalence of procedures in the presence of memory allocation, cyclic data structures and recursion. Our technique addresses the need for finding witnesses to isomorphism with angelic allocation, supports reasoning about equivalent procedures calls when the stores are only locally isomorphic, and reasoning about changes in the order of procedure calls. We have implemented RIE by encoding it in the Boogie program verifier. We describe the encoding and prove its soundness.
 
-% Sophia's version
-
-%In the course of program maintenance, one often replaces a procedure by an equivalent version, where two procedures are equivalent, if, when called on isomorphic states, they result in isomorphic states. Given the prevalence of maintenance in the program lifecycle, automatic verification of procedure equivalence is of great practical importance. Current tools are very powerful in establishing a stronger version of equivalence, \ie that two procedures when applied to equal states  result in equal states. However, in the presence of dynamic memory allocation strong equivalence is too strong, and the tools cannot be applied.
-
-%We have developed a methodology, \metho{}, which can automatically establish (weak) equivalence of procedures in the presence of memory allocation as well as recursion. For this, we faced several challenges, among which the need to search for a witness to the isomorphism, and the fact that corresponding nested method calls do not necessarily take place on equivalent states. We addressed the former by searching instead for an angelic allocator, and the latter, by adapting the mutual summaries approach so that it only requires the accessible part of the state to be equal and only guarantees that the modified part of the resulting states are equal.
-
-%We have implemented \metho{} in a prototype tool, \tool{}, which produces Boogie code, and ultimately is solved by the SMT solver Z3. In encoding reachability, heap equality, and equality up to reachability we had to combine uninterpreted functions, and triggers so as to control unfolding of the predicates.
-
-%In this paper we describe \metho{}, the Boogie encoding and prove soundness.
-
-% My version
-
-%Program maintenance dominates the lifecycle but often leads to unwanted changes in behaviour. The testing community recognise this with the use of regression testing. Advances in constraint solving and other technologies are making fully automatic program equivalence verification more practical, and recently several equivalence verification tools have been developed. They have limited support for the heap, with dynamic heap memory allocation a particular problem. We present a methodology and tool, for a simple OO programming language, that can prove equivalence of programs where heap allocation differs. Our modular verification methodology is sound and amenable to an SMT solver.
-
 \keywords{Program Equivalence, Program Verification, Version-aware Verification}
 \end{abstract}
 
 \section{Introduction}
-%fixing bugs and adding features is recurring, expensive, and error-prone
 
 Program maintenance dominates the program lifecycle. A study of application bugs that took more than one attempt to fix~\cite{Park2012} found that 22\%-33\% of fixes required a supplementary fix, and found a diverse range of errors including incomplete refactorings. A study of refactorings~\cite{Bavota2012} found that, across 12,922 refactorings from three software projects, 15\% of refactorings induced a bug. \emph{Automatic program equivalence verification}~\cite{Godlin09,Lahiri2012,Partush2014,Felsing2014} offers the potential to reduce problems by allowing a programmer to automatically (without programmer annotations) verify that the new version is, fully or partially, behaviourally equivalent to the old.
-
-% A study of operating system bugs~\cite{Yin2011} found that at least 14.8\%-24.4\% of patches were incorrect. 
 
 The goal of these verification tools is to make the benefits of program equivalence verification available to programmers who are not verification experts. An automatic equivalence verification tool \emph{takes a pair of programs as input and then outputs whether the programs are equivalent or not} (or perhaps times-out). Program equivalence is undecidable in the general case, however, some success has been achieved on programs with substantially similar structure. Different versions of a software product are frequently structurally similar because a later version is often created by modifying an earlier version. 
 
@@ -743,9 +726,6 @@ We know of four existing tools designed with the goal of fully-automatic program
 Symdiff relates heaps using equality (of arrays modelling the heaps), which we will call \emph{\symdiffequivn{}}, so programs that differ in the order or amount of dynamic memory allocation or garbage cannot be verified as equivalent by Symdiff. RVT does support differences in allocation, but assumes that all heap data-structures are tree-like.\footnote{For details, see \emph{Definition 2} (and the paragraph following) on page 5 of the 2009 paper by \citeauthor{Godlin09}~\cite{Godlin09}.}
 
 \Symdiffequivn{} is too restrictive for programmers, they expect to be able to replace one procedure with another if the two have identical observable behaviour. A more intuitive notion of procedure equivalence for programs with dynamic memory allocation can be constructed using isomorphism between memory locations. Definitions of program equivalence based on a notion of isomorphism have been used in several formal systems~\cite{Benton2007,Pitts2002}. Our definition of equivalence is that \emph{both procedures terminate for the same set of initial stores, and if both procedures run to completion from isomorphic initial stores, they result in isomorphic final stores}. Our definition of equivalence matches intuition: it allows for differences in the order or amount of memory allocation and garbage and is not restricted to tree-like structures.
-
-% stuff that needs to be put back in somewhere:
-% a contextual~\cite{Morris1968} equivalence for our language, and is 
 
 Our objective is to support automatic verification of programs which differ in the order or amount of dynamic memory allocation or garbage. Achieving this presents several challenges:
 
@@ -758,8 +738,6 @@ Sometimes calls to equivalent procedures occur from stores that are not fully is
 \textbf{\Cthree{}}. Equivalent calls from non-isomorphic stores do not necessarily result in isomorphic stores.
 
 \textbf{\Cfour{}}. It is not known in advance which calls may be equivalent, and there may be many candidates. Equivalent calls may not occur in the same order in each procedure, and moreover the procedure calls which correspond may differ from execution to execution depending on the initial state (\ie program inputs).
-
-%\textbf{Challenge 5}. Because the question of verifying program equivalence is undecidable in general, and has high computational complexity in many specific cases, we had to design our Boogie encoding carefully so that predicates are unfolded enough but not too much.
 
 \subsection{Example}\label{sec:example}
 \newcommand*{\copylr}{\texttt{lcopy}}
@@ -819,17 +797,7 @@ The procedures are not \symdiffequiva{} when the stores are related with equalit
 
 The example illustrates the challenges in the following ways. \textbf{\Cone{}}: equivalence requires that the final stores are isomorphic, but the recursive calls are unbounded so a tool has to check isomorphism of a graph of arbitrary shape and unbounded size. \textbf{\Ctwo{}}: the stores are not equivalent prior to the recursive calls. For instance, in \copylr{} three allocations (\cref{lst:orig copylr alloc1,lst:orig copylr alloc2,lst:orig copylr alloc3}) have occurred before the recursive calls, but in \copyrl{} only two allocations have occurred (\cref{lst:orig copyrl alloc1,lst:orig copyrl alloc2}). \textbf{\Cthree{}}: the stores after the related calls on \cref{lst:orig copylr call1} and \cref{lst:orig copyrl call2} are not generally isomorphic, since the store after \cref{lst:orig copyrl call2} contains the effects of two recursive calls but the store after \cref{lst:orig copylr call1} contains the effect of only one recursive call. \textbf{\Cfour{}}: we do not know in advance which recursive call in \copylr{} (\cref{lst:orig copylr call1,lst:orig copylr call2}) corresponds to which recursive call in \copyrl{} (\cref{lst:orig copyrl call1,lst:orig copyrl call2}).
 
-%The recursive calls in \cref{fig:copy tree} illustrate challenges \textbf{two, three} and \textbf{four}, here we describe how those challenges are addressed by our implementation.
-
-%\Ctwo{} applies because \textbf{Second}, we do not know in advance which pair of calls are related by an interesting coupling relation. In this example it happens to be that the first call in \copylr{} corresponds to the second call in \copyrl{} and vice versa. But the tool must be able to establish this automatically. \textbf{Third}, because the first call in \copylr{} (\cref{lst:orig copylr call1}) is related to the second call in \copyrl{} (\cref{lst:orig copyrl call2}) the tool has to relate a store from \copylr{} where no recursive call has occurred with a store from \copyrl{} where the effect of a recursive call will have occurred. 
-
-% This definition is a contextual equivalence; \lang{} does not contain any statements that can distinguish between isomorphic stores. In particular, \lang{} programs can not distinguish the actual memory location of an object, nor can they observe the amount or shape of garbage.  We formalise the definitions in \cref{sec:soundness}. 
-
-%Existing tools typically construct an inductive, and modular, argument that procedures are equivalent. \citeauthor{Godlin08}~\cite{Godlin08} and \citeauthor{Lahiri2012}~\cite{Lahiri2012} both describe formal systems extending modular reasoning to pairs of procedures. Such a tool must first establish that the procedures are equivalent for the base cases (in our example, where \texttt{t} or \texttt{r} are null). Then in the inductive cases, a tool may assume that pairs of recursive calls to equivalent procedures with equivalent arguments have equivalent effects. 
-
 In the next section we use the example to illustrate \metho{}, and to illustrate how \metho{} addresses the challenges.
-
-% In \lang{} loops are encoded as recursive procedures. References are opaque, they may be compared for equality or nullness only. To simplify our presentation, values can only be returned via the heap (in this example via the heap cell passed as parameter \texttt{r}). 
 
 \subsection{Contributions}
 
@@ -838,8 +806,6 @@ We propose a sound methodology, \emph{\metho{}}, for establishing isomorphic pro
 We describe a simple language \lang{} for which isomorphism implies equivalence of observable behaviours, and give a formal definition of what it means for a language to be closed under an isomorphism.
 
 \metho{} also simplifies challenges two, three and four. \metho{} allows us to use equality in place of isomorphism, so \textbf{\ctwo{}} is addressed by extending the notion of heap equality to support partial heap equality, which we then apply to an overapproximation of the footprint of the procedures. Furthermore \metho{} rescues us from the need to produce a witness to the correspondence between procedure behaviour, instead we address \textbf{\cthree{}} by equating the write effects of equivalent procedures (soundly ignoring unobservable behavioural differences). We combine our technique with mutual summaries to address \textbf{\cfour{}}.
-
-%This paper contains: A definition of equivalence, and methodology \metho{}, for automatically proving equivalence of programs which vary in dynamic memory allocation. A description of how \metho{} is implemented in an SMT based tool, \tool{}, for equivalence verification of a simple imperative language. A proof of \metho{}'s soundness.
 
 In \cref{sec:impl} we describe how \metho{} can be implemented to verify program equivalence. In \cref{sec:soundness} we formalise equivalence and isomorphism and outline \metho{}'s soundness proof. In \cref{sec:discussion} we discuss the effectiveness and limitations of \metho{}. Finally in \cref{sec:related} we discuss some related work.
 
@@ -964,13 +930,13 @@ function $SameDiff($h_pre_0, $h_post_0, $h_pre_1, $h_post_1:Heap) : bool {£\lab
 \caption{Mutual summary of the \texttt{lcopy} and \texttt{rcopy} procedures. Written in Boogie.}\label{fig:mutual summary}
 \end{figure}
 
-Equivalent procedure calls do not always occur from isomorphic stores (\textbf{\ctwo{}}), this is overcome by considering only the region of the heap reachable from the procedure parameters when trying to establish equivalence of procedure calls. This corresponds to the predicate \texttt{\$Heap\#EqualFromParams} on \cref{lst:summary axiom antecedent}, detailed in \cref{sec:extensionality}. %The calls on \cref{lst:orig copylr call1,lst:orig copyrl call2} have equivalent procedure parameters, the heaps reachable from \texttt{t.l} are equivalent in both procedures, and the parameter \texttt{rl} points to a newly allocated object. 
+Equivalent procedure calls do not always occur from isomorphic stores (\textbf{\ctwo{}}), this is overcome by considering only the region of the heap reachable from the procedure parameters when trying to establish equivalence of procedure calls. This corresponds to the predicate \texttt{\$Heap\#EqualFromParams} on \cref{lst:summary axiom antecedent}, detailed in \cref{sec:extensionality}. 
 
 Equivalent procedure calls do not necessarily result in isomorphic stores (\textbf{\cthree}). This is overcome through our choice of procedure summary (\cref{lst:summary axiom consequent}) and a frame axiom. The write effects of a pair of equivalent procedure calls are related by the predicate \texttt{\$SameDiff} (\cref{lst:samediff}). The frame axiom appears as a free post condition\footnote{A free postcondition may be assumed after a call, but is not checked.} of every procedure (\cref{lst:frame axiom lr,lst:frame axiom rl}).  Both are described below.
 
 Equivalent procedure calls are summarised by the predicate \texttt{\$SameDiff} that relates the pre and post stores of both calls. \texttt{\$SameDiff} approximates the actual behaviour of the procedures a surprising way, although equivalent procedures can vary in the amount and shape of garbage, \texttt{\$SameDiff} states that equivalent procedure calls will always have equal effects, we justify this in \cref{sec:soundness}.
 
-The framing axioms (\cref{lst:frame axiom lr,lst:frame axiom rl}) restrict the write effects of the procedures to the part of the heap that was reachable from the procedure parameters. The axiom follows from the semantics of \lang{}.%, which does not have pointer arithmetic or pointer synthesis. \Tool{} includes several other framing axioms, but they are beyond the scope of this paper.
+The framing axioms (\cref{lst:frame axiom lr,lst:frame axiom rl}) restrict the write effects of the procedures to the part of the heap that was reachable from the procedure parameters. The axiom follows from the semantics of \lang{}.
 
 It is not known in advance which procedure calls might be equivalent (\textbf{\cfour{}}). This is overcome by how the summary of the behaviour of equivalent procedures is encoded. Specifically, the encoding of mutual-summaries presented by \citeauthor{Hawblitzel2013}~\cite{Hawblitzel2013} is used to induce the SMT solver to search for related pairs of procedure calls. We detailed this encoding below. 
 
@@ -998,7 +964,6 @@ We start with an overview of the semantics of \lang{}, then define isomorphism a
 	\grammarrow{s \in \Statement}{ $s_a$ | $\guard{b}{s_a}$ | $s;s$ } 
 	\grammarrow{e \in \ScalarExpr}{ $\nullv$ | $x$ | $e.f$ | b } 
 	\grammarrow{b \in \BoolExpr}{ $x=y$ | $!b$ | $b \band b$ | $\truev$ | $\falsev$ } 
-%	\grammarrow{tr \in \Trace}{ $(s_a,\store,\store)$ | $tr \cdot tr$ } 
 \end{tabularx}
 
 \begin{tabularx}{\linewidth}{ l }
@@ -1007,7 +972,7 @@ Set $\Address$ has one reserved element \texttt{null}. \\
 \end{tabularx}
 
 \vspace{0.3cm}
-\begin{tabularx}{\linewidth}{ l l } % X }
+\begin{tabularx}{\linewidth}{ l l }
 $h \in \Map $ & $\defeq (\Address \times \Field)\parfun\Values$ where $\forall h,f \suchthat h(\nullv,f)=\nullv$. \\
 $\stackf \in \StackFrame $ & $ \defeq \LVar\parfun\Values$ \\
 $\stack \in \Stack $ & $ \defeq \StackFrame^*$ \\
@@ -1020,7 +985,6 @@ $\proc : \PName \rightarrow \Statement$ & looks up procedure bodies from procedu
 \vspace{0.3cm}
 $\heapof{\store}\defeq h$ and $\stackof{\store}\defeq \stack\cdot\stackf$ and $\popof{\store} \defeq (\stack,h)$ and $\topof{\store} \defeq \stackf$ when $\store=(\stack\cdot\stackf,h)$
 
-%The $i^{th}$ stack frame is $\stack[i]$, and $\stack\cdot\stackf$ means the stack with $\stackf$ appended to $\stack$.
 
 \vspace{0.5cm}
 \EvaluationRule
@@ -1141,39 +1105,6 @@ We only discuss some of the rules of the operational semantics. \blNew{} allocat
 
 Angelic allocation in the rule \composeRuleAbstract{} is modelled by the predicate over trace pairs $\isoR$. The behaviour of called procedures in the \asemantics{} is modelled by the predicate over trace pairs $\mutR$. We define $\isoR$ and $\mutR$, as the chapter progresses. 
 
-
-
-% stuff we need to say:
-%The $i^{th}$ stack frame is $\stack[i]$, and $\stack\cdot\stackf$ means the stack with $\stackf$ appended to $\stack$.
-%And a mapping between allegedly equivalent procedures $\equivmap : \PName \rightarrow \PName$
-
-%Stuff we don;'t need to say anymore
-%We write $\range{R}$ to mean the range of the partial function $R$ and $\domain{R}$ to mean the domain of $R$.
-%Infinite enumerable set $\Address$ of addresses, ranged over by $a$, with one reserved element \lstinline{null}. Extended to $\Values \defeq \Address \cup \{\truev, \falsev\}$, ranged over by $v$.
-%Enumerable sets $\LVar$ of variable names, $\Field$ of field names, $\PName$ of procedure names, ranged over by $x$, $f$, $f$.
-%	
-%$\Map \defeq (\Address \times \Field)\parfun\Values$, 
-%stack frames $\StackFrame \defeq \LVar\parfun\Values$, 
-%and $\Stack \defeq \StackFrame^*$. 
-%Ranged over by $h$, $\stackf$ and $\stack$. 
-%Where $\forall h,f \suchthat h(\nullv,f)=\nullv$.  
-%
-%$\Store \defeq \Stack \times \Map$, ranged over by $\store$. The heap of $\store$ is $\heapof{\store}$, and the stack $\stackof{\store}$; The value obtained by following the, possibly empty, sequence of fields $\seq{f}$ from the address in local variable $x$ in the top most stack frame of $\store$ is $\store(x,\seq{f})$.
-%
-%And $\proc : \PName \rightarrow \Statement$ and $\param : \PName\times\mathbb{N} \parfun \LVar$ , respectively, look up procedure bodies and parameter names from procedure names.
-
-
-%\begin{definition}[Semantics of \lang{}]\label{def:language}
-%
-%The statements $\Statement$ and operational semantics are defined in \cref{fig:bl-op-sem,fig:bl call and compose}. The big step execution relation is parameterized by $\metasem \in \{\Vsemantics,\Asemantics\}$ %$\Semantics \defeq \{\Vsemantics,\Asemantics\}$
-%			\[\exeEither \subseteq \Store\times(\Statement \cup \body) \rightarrow \Trace\times\Store\] 
-%\end{definition}
-
-%Relation $\iso \subseteq \Store \times \powerset{\Values\times\Values} \times \Store$, relates isomorphic stores and is written $\store_1 \iso_{\pi_1} \store_2$, defined in \cref{def:global isomorphism}. 
-
-
-
-
 \subsection{Isomorphism} 
 
 Stores are isomorphic if they differ only in the actual values of heap addresses or in garbage. An isomorphism is characterised by a bijection between values, $\pi$. \Cref{def:global isomorphism} says that $\store_1$ is isomorphic to $\store_2$ with relation $\pi$ iff the stacks of $\store_1$ and $\store_2$ are the same height; for each corresponding stack frame the same variables are defined; and $\pi$ is an injection. Where $\pi$ is the uniquely defined relation that maps the stack variables of $\store_1$ to $\store_2$, commutes with field dereference, and preserves the meaning of $\nullv$, $\truev$, and $\falsev$. 
@@ -1243,7 +1174,7 @@ Where trace isomorphism is:
 
 And where $\diff(\store_1,\store_3) \defeq \heapof{\store_3} \setminus \heapof{\store_1}$
 \end{lemma}
-\begin{proof}By induction on the derivation of $\store_1,s\exeEither[\tr_1]\store_3$. Most cases are straightforward since no instruction is sensitive to the actual value of addresses. Note that every instruction makes the set of reachable addresses smaller, apart from $\news$ which expands it by exactly one fresh address --- this corresponds to the fact that addresses are never synthesised and garbage is never resurrected.\qed\end{proof} %TODO - perhaps say more about the proof
+\begin{proof}By induction on the derivation of $\store_1,s\exeEither[\tr_1]\store_3$. Most cases are straightforward since no instruction is sensitive to the actual value of addresses. Note that every instruction makes the set of reachable addresses smaller, apart from $\news$ which expands it by exactly one fresh address --- this corresponds to the fact that addresses are never synthesised and garbage is never resurrected.\qed\end{proof}
 
 A way to think of \ncui{} is that \lang{} is not sensitive to the actual values of addresses nor garbage. Many industrial languages (such as C, Java, Python, C$^\sharp$, etc) contain features that are sensitive to the actual values of heap addresses or order of allocation. Such sensitivity is typically not central to the language and it is often not necessary to use such features. 
 
@@ -1320,12 +1251,6 @@ Predicate $\isoR$ (\cref{def:my compatible isomorphic states}) retains only trac
 \Cref{def:isomorphic points} requires that the points are selected symmetrically for isomorphic traces. This symmetry is critical for the soundness of \metho{}, which must verify at least one pair of execution traces for each initial state. Furthermore, the definition requires that the union of the isomorphisms between the selected heap regions is an injection. This corresponds to the fact that \metho{} is implemented by equating allocation sites, and will be discussed further in later sections, particularly \cref{sec:discussion}.
 
 \subsection{Mutual Summaries of Equivalent Procedures}
-
-%\metho{} is a modular verification methodology. Modular verification is important in allowing \metho{} to scale to large programs. Modular verification means that, during verification, the behaviour of called procedures is abstracted by a summary. Since \metho{} is concerned with equivalence verification it uses mutual summaries that relate the behaviour of pairs of procedure calls. The summary is assumed in the callers, but verified against the callees. In the case of recursion or mutual recursion an inductive argument is constructed~\cite{Godlin09}.
-
-%As described in \cref{sec:recursion}, \metho{} abstracts pairs of allegedly equivalent procedures with a summary that assumes that allegedly equivalent procedures have \emph{equal} effects. This summary is not an overapproximation of the behaviour of equivalent procedures, because equivalent procedures may differ in the amount and shape of garbage. Nevertheless it is sound. 
-
-%Nevertheless, we would still like to use facts about which called procedures are equivalent. When verifying a particular pair of procedures we assume that the procedures in $\equivmap$ are equivalent, but equivalence is checked for each pair in $\equivmap$ in turn~\cite{Godlin09}.
 
 \tool{} uses mutual summaries, \cref{lst:summary axiom start,lst:summary axiom end} in \cref{fig:mutual summary}, to allow the verifier to use facts about the behaviour of equivalent procedure calls in its proofs. 
 
@@ -1438,8 +1363,6 @@ From the antecedent we know that $\last{\tr_3}\iso\last{\tr_2}$, and since $\tr_
 \begin{itemize}
 \item[] To show: there exists an execution $\store_2,\body~\fun_1\exeAbstract[\tr_5]\store_7$ such that $\mutR(\tr_5,\tr_2)$ and $\tr_5\iso_\identity\tr_3$ \tagsix{}. 
 %
-%To construct such an execution we will replace the behaviour of all procedure calls according to $\equivmap$ so that the effects are isomorphic. 
-%
 Proceed by an inner induction over the derivation of $\store_2,\body~\fun_1\exeVerified[\tr_3]\store_5$.
 %
 Most cases are trivial. The interesting cases are \callRuleVerified{} where the called procedure is in $\equivmap$, and the inductive case \blTrans{}.
@@ -1494,7 +1417,6 @@ We considered many alternative approaches to establishing isomorphism. The natur
 The isomorphism between lines~\ref{lst:listex find one} and~\ref{lst:listex' find} relates the addresses in \texttt{rf0} and \texttt{rf}. The isomorphism between lines~\ref{lst:listex find two} and~\ref{lst:listex' find} relates the addresses in \texttt{rf1} and \texttt{rf}. If we were to assume equality for both of these isomorphisms then we would have $\texttt{rf} = \texttt{rf0} = \texttt{rf1}$. However, \texttt{rf0} is allocated by the \texttt{new} statement on line~\ref{lst:listex new one} whereas \texttt{rf1} is allocated by the subsequent \texttt{new} statement on line~\ref{lst:listex new two}. The semantics of \texttt{new} require that each allocation gives an address which was not previously allocated --- \ie that $\texttt{rf0} \neq \texttt{rf1}$.
 
 \metho{}, therefore, restricts the selected points in \cref{def:my compatible isomorphic states} to prevent contradictory isomorphisms being selected. Due to this restriction a verifier using \metho{} alone may fail to produce a proof for some procedures that are in fact equivalent according to our definitions. Any tool using \metho{} in practice may choose to equate one pair of calls to \texttt{find}, but it must find some other way to deal with the other pair of calls (such as manually adding an additional specification of \texttt{find}). 
-%For instance, it is possible to progress with this example by manually providing an additional mutual summary~\cite{Hawblitzel2013} relating the behaviour of calls to \texttt{find} more precisely.  
 
 \begin{figure}[htbp]
 \noindent\begin{minipage}{.48\textwidth}
@@ -1596,19 +1518,15 @@ function $NoInboundEdges($h:Heap, $a:Ref) : bool
 
 \section{Related Work and Conclusions}\label{sec:related}
 
-%One could approach proving equivalence by independently proving functional correctness against the same specification. Many works instead try to use both programs together to simplify the problem. We focus particularly on imperative programs and the state-of-the-art in fully automatic procedure equivalence verifiers. 
-
 The study of program equivalence arguably pre-dates the study of functional correctness. In his 1969 paper~\cite{Hoare1969}, \citeauthor{Hoare1969} identified that ``Many [previous] axiomatic treatments of computer programming~\cite{Yanov1958,Igarishi1964,DeBarker1968} tackle the problem of proving the equivalence, rather than the correctness, of algorithms''. To date, practical approaches to program equivalence rely on structural similarity of the programs. Many works focus on methods to account for some structural differences. The importance of program structure in proving program equivalence was observed by Dijkstra in 1972~\cite{Dahl1972}, where he also observes that programmers are often called upon to modify existing programs.
 
 Key developments in program equivalence have come from research into \emph{non-interference} in \emph{secure information flow} and compiler \emph{translation validation}. Non-interference is the property that the values of secret inputs do not influence public outputs. Translation validation provides assurances that the program output by a compiler is correct with respect to the input program. Translation validation concerns itself with correctness of particular compiler runs, and does prove the compiler implementation correct.
 
-Non-interference can be formalised in terms of program equivalence~\cite{Joshi2000}, or more generally as a safety property over pairs of program traces~\cite{Barthe2004,Terauchi2005}.  Methods for reducing safety properties over trace pairs to safety properties over single traces have been explored~\cite{Leino2008a,Benton2006} and generalised, particularly via product programs~\cite{Barthe2011,Barthe2013} and similar~\cite{Zaks2008,Stepp11,Tristan11}. \emph{Product programs} combine a pair of programs into one, such that useful invariants can be formulated at interesting points in the product, and can generalise to relations between programs~\cite{Barthe2016}. %Including proving program continuity~\cite{Barthe2011}, abstraction and refinement relationships between programs~\cite{Barthe2013}, compiler correctness~\cite{Zaks2008}, vectorising loops~\cite{Barthe2013}, and differential privacy policies~\cite{Barthe2014}.
+Non-interference can be formalised in terms of program equivalence~\cite{Joshi2000}, or more generally as a safety property over pairs of program traces~\cite{Barthe2004,Terauchi2005}.  Methods for reducing safety properties over trace pairs to safety properties over single traces have been explored~\cite{Leino2008a,Benton2006} and generalised, particularly via product programs~\cite{Barthe2011,Barthe2013} and similar~\cite{Zaks2008,Stepp11,Tristan11}. \emph{Product programs} combine a pair of programs into one, such that useful invariants can be formulated at interesting points in the product, and can generalise to relations between programs~\cite{Barthe2016}. 
 
 Compiler translation validation~\cite{Kundu09,Stepp11,Tristan11,Le2014,Zaks2008} is inherently a program equivalence question. Many techniques have been applied, several variations of product programs~\cite{Zaks2008}, constructing bisimulations between control flow graphs~\cite{Kundu09}, iteratively applying equality axioms~\cite{Stepp11}, or normalising~\cite{Tristan11} graph representations of the programs.
 
-\emph{Relational Hoare Logic}~\cite{Benton2004,Benton2007,Yang2007,Beringer2011,Barthe2016} (RHL) was proposed by \citeauthor{Benton2004}, in 2004~\cite{Benton2004}, in the course of proving the correctness of various compiler optimisations. The Hoare triple $\{P\} S \{Q\}$ is extended to a Hoare quadruple by inclusion of two statements, rather than one, $\{P\} C_1 \sim C_2 \{Q\}$. The pre and post conditions are lifted to relations over stores. RHL has been extended by various rules to account for differences in structure between the programs~\cite{Benton2004,Barthe2016}. \citeauthor{Barthe2016}~\cite{Barthe2016} pointed out that RHL is closely related to the idea of product programs. % adds additional rules to the logic inspired by the compiler optimisations under examination, \eg eliminating while loops when the condition is known to be false. The connection between RHL and secure information flow is also noted in \citeauthor{Benton2004}{'s} 2004 paper.
-
- %RHL rules that deal with difference in program structure have close analogues in product program construction rules. RHL can be used to give a relational meaning to the proof on a product program. Many rules in RHL and product program construction allow one program to take a step whilst the other executes a \texttt{skip}, and so have a ``left'' and a ``right'' form depending on which of the programs steps. These rules allow both RHL and product programs to account for some structural difference between the programs. Interestingly the completeness of various RHL variants and product program construction approaches can be related. In particular a self-composition rule can be added to both RHL and product programs to give them the same completeness as the standard Hoare Logic~\cite{Barthe2016}.
+\emph{Relational Hoare Logic}~\cite{Benton2004,Benton2007,Yang2007,Beringer2011,Barthe2016} (RHL) was proposed by \citeauthor{Benton2004}, in 2004~\cite{Benton2004}, in the course of proving the correctness of various compiler optimisations. The Hoare triple $\{P\} S \{Q\}$ is extended to a Hoare quadruple by inclusion of two statements, rather than one, $\{P\} C_1 \sim C_2 \{Q\}$. The pre and post conditions are lifted to relations over stores. RHL has been extended by various rules to account for differences in structure between the programs~\cite{Benton2004,Barthe2016}. \citeauthor{Barthe2016}~\cite{Barthe2016} pointed out that RHL is closely related to the idea of product programs. 
 
 Several formal works tackle the problem of proving program equivalence in the presence of dynamic memory allocation. \citeauthor{Pitts2002} uses a simulation between memory locations when defining a semantic approach to program equivalence~\cite{Pitts2002}, the memory model is flat not a heap. \citeauthor{Benton2007} uses isomorphism between heap regions when proposing an RHL that supports dynamic allocation~\cite{Benton2007}. \citeauthor{Yang2007} constructs a relational separation logic with support for dynamic allocation~\cite{Yang2007}. \citeauthor{Sumner2010} propose a different approach, canonical memory addresses are constructed based on program control flow and syntactic elements. \citeauthor{Banerjee2016}~\cite{Banerjee2016} propose a logic for weaving programs with structural differences so that relational properties of programs can be expressed. They extend this with a region logic to support reasoning about encapsulation in dynamically allocating programs; catering for equivalence between programs which vary the representation of objects.
 
@@ -1626,7 +1544,6 @@ R{\^e}ve~\cite{Felsing2014} and SCORE~\cite{Partush2014} support numerical progr
 We defined procedure equivalence, and a sound methodology \metho{}, for automatically proving equivalence of programs which vary in dynamic memory allocation. We described our \metho{} encoding \tool{} for equivalence verification (available at \url{https://github.com/lexicalscope/ape}). Our approach is fully automatic, and applicable to programs which manipulate heap data-structures of any shape.
 
 \printbibliography
-
 
 %\section*{Appendix}
 
