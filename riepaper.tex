@@ -1109,7 +1109,7 @@ The following points are interesting about our semantics: \textbf{First}, we dis
 
 We only discuss some of the rules of the operational semantics. \blNew{} allocates a new object. The address of the object must be fresh, and the object has all fields set to \texttt{null}. \blAssign{} updates a stack variable $x$ with the result of evaluating an expression $e$ in the store $\store$.
 
-\bodyRuleVerified{} executes the body of a procedure \texttt{\fun} by looking up and executing \texttt{\fun}'s statements. Our assumption that procedure contracts have already been verified is modelled by the requirement $(\store_1,\store_3) \in \Contract(\fun)$. Note that \bodyRuleVerified{} pops the top of the final stack, while \callRuleAbstract{} and \callRuleVerified{} push new frames (using the function $\mkframe$). 
+\bodyRule{} executes the body of a procedure \texttt{\fun} by looking up and executing \texttt{\fun}'s statements. Our assumption that procedure contracts have already been verified is modelled by the requirement $(\store_1,\store_3) \in \Contract(\fun)$. Note that \bodyRule{} pops the top of the final stack, while \callRuleAbstract{} and \callRuleVerified{} push new frames (using the function $\mkframe$). 
 
 \callRuleAbstract{} models abstraction of procedure calls. The behaviour of the abstracted call is restricted by the procedure's contract $\Contract(\fun)$, and the call may not free any allocated address (\lang{} never frees or reuses allocated memory).
 
