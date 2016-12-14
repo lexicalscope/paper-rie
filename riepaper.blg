@@ -1,0 +1,15 @@
+[0] Config.pm:343> INFO - This is Biber 2.5
+[0] Config.pm:346> INFO - Logfile is 'riepaper.blg'
+[89] biber-darwin:290> INFO - === Wed Dec 14, 2016, 12:43:45
+[138] Biber.pm:351> INFO - Reading 'riepaper.bcf'
+[242] Biber.pm:776> INFO - Found 48 citekeys in bib section 0
+[255] Biber.pm:3493> INFO - Processing section 0
+[273] Biber.pm:3657> INFO - Looking for bibtex format file 'references.bib' for section 0
+[293] bibtex.pm:1187> INFO - Decoding LaTeX character macros into UTF-8
+[296] bibtex.pm:1048> INFO - Found BibTeX data source 'references.bib'
+[405] UCollate.pm:66> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
+[406] UCollate.pm:66> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
+[406] Biber.pm:3306> INFO - Sorting list 'nty/global/' of type 'entry' with scheme 'nty' and locale 'en-US'
+[406] Biber.pm:3310> INFO - No sort tailoring available for locale 'en-US'
+[471] bbl.pm:526> INFO - Writing 'riepaper.bbl' with encoding 'UTF-8'
+[477] bbl.pm:619> INFO - Output to riepaper.bbl
