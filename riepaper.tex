@@ -733,10 +733,10 @@ Symdiff relates heaps using equality (of arrays modelling the heaps), which we w
 Achieving automatic verification presents several challenges:
 \begin{description}
 \item[\Cone{}]What kind of input do we need to give to an SMT solver so that it can even do the verification? We need to establish an isomorphism between unbounded heaps of arbitrary shape when this is computationally infeasible in general. Furthermore, a direct axiomatisation of isomorphism involves existentially quantifying the mapping between memory locations that characterises the isomorphism. SMT based verification systems are not very good at producing witnesses to such existentials and so a direct axiomatisation of isomorphism is ineffective.
-
-
+\end{description}
 Sometimes calls to equivalent procedures occur from stores that are not fully isomorphic, rather the stores are isomorphic in the footprint of the called procedures. This leads to the next two challenges:
 
+\begin{description}
 \item[\Ctwo{}]How can our tool determine when stores correspond in the footprint of a called procedure?
 
 \item[\Cthree{}]What should we do about equivalent calls from non-isomorphic stores since they do not necessarily result in isomorphic stores?
@@ -817,7 +817,7 @@ The example illustrates the challenges in the following ways. \textbf{\Cone{}}: 
 
 \subsection{Contributions}
 
-We propose a sound methodology, \metho{}, for establishing isomorphic procedure equivalence which is effective in an SMT solver. \metho{} enables our tool \tool{} \footnote{Source code available at \url{https://github.com/lexicalscope/ape}} to tackle \textbf{\cone{}} by automatically establishing isomorphism using under-approximation and heap equality! \metho{} (\textbf{R}eplace \textbf{I}somorphism with \textbf{E}quality) works by proving equivalence under the \emph{angelic allocation} assumption; the memory locations are, as far as possible, assumed to be allocated in such a way as to make isomorphic heaps also equal.
+We propose a sound methodology, \metho{}, for establishing isomorphic procedure equivalence which is effective in an SMT solver. \metho{} enables our tool \tool{} to tackle \textbf{\cone{}} by automatically establishing isomorphism using under-approximation and heap equality! \metho{} works by proving equivalence under the \emph{angelic allocation} assumption; the memory locations are, as far as possible, assumed to be allocated in such a way as to make isomorphic heaps also equal.
 
 We describe a simple language \lang{} for which isomorphism implies equivalence of observable behaviours, and give a formal definition of what it means for \lang{} to be closed under isomorphism.
 
@@ -827,9 +827,11 @@ In \cref{sec:impl} we describe how \metho{} can be implemented to verify program
 
 \section{Encoding in a Verifier}\label{sec:impl}
 
-In this section we illustrate \metho{} by showing how our tool, \tool{}, encodes the example from \cref{sec:example} and how that encoding helps overcome the challenges detailed in the introduction. In particular we show how verification under the assumption of ``angelic allocation'' proceeds.
 
-Prior formal work typically takes the approach of abstracting or overapproximating programs with dynamic allocation~\cite{Tennent2000,Koutavas2006,Benton2007,Tzevelekos2012}, \emph{storeless semantics}~\cite{Bozga2003} go as far as abstracting away the observable store entirely. We make the surprising observation that under-approximating memory allocation is also a useful approach, and our formal system proves it sound. \metho{} establishes procedure equivalence by checking equivalence for only one pair of execution traces for each initial store. Specifically: \begin{quote}\emph{All} pairs of executions from isomorphic initial stores result in \emph{isomorphic} final stores if at least \emph{one} pair of executions from each initial store results in \emph{equal} final stores.\end{quote} In particular, it is not necessary to consider all pairs of isomorphic initial stores. We prove this in \cref{sec:soundness}.
+{\bf TIM: Write a short paragraph that says something like "Our tool \tool{}  takes as input an L program  and produces as output `success', `failure', or times out. It does this by generating Boogie code, which is fed into the Z3 SMT solver. The source code is available at \url{https://github.com/lexicalscope/ape}."} 
+
+In this section we illustrate \metho{} by showing how \tool{}, encodes the example from \cref{sec:example} and how that encoding helps overcome the challenges detailed in the introduction. In particular we show how verification under the assumption of ``angelic allocation'' proceeds.
+Previous work typically takes the approach of abstracting or overapproximating programs with dynamic allocation~\cite{Tennent2000,Koutavas2006,Benton2007,Tzevelekos2012}, \emph{storeless semantics}~\cite{Bozga2003} go as far as abstracting away the observable store entirely. We make the surprising observation that under-approximating memory allocation is also a useful approach, and our formal system proves it sound. \metho{} establishes procedure equivalence by checking equivalence for only one pair of execution traces for each initial store. Specifically: \begin{quote}\emph{All} pairs of executions from isomorphic initial stores result in \emph{isomorphic} final stores if at least \emph{one} pair of executions from each initial store results in \emph{equal} final stores.\end{quote} In particular, it is not necessary to consider all pairs of isomorphic initial stores. We prove this in \cref{sec:soundness}.
 
 \metho{} combines our ideas about establishing isomorphism using SMT technology with the prior work on product programs and mutual summaries to produce an automatic program equivalence tool that can verify our example. Standard single program verification tools can be applied to the problem of procedure equivalence using \emph{product programs}~\cite{Barthe2004,Terauchi2005,Godlin09,Lahiri2012,Barthe2016}, which encode the bodies of a pair of procedures into a single procedure such that verifying a safety property of the product procedure is equivalent to verifying a relational property of the procedure pair~\cite{Barthe2016}. Furthermore, a technique called \emph{mutual summaries}~\cite{Hawblitzel2013} can be applied to induce an SMT solver to search for interesting relations between procedure calls.
 
@@ -1426,6 +1428,35 @@ Framing of procedure calls is important in verifying equivalence for many exampl
 
 We considered many alternative approaches to establishing isomorphism. The natural approach using existentials does not work very well. We investigated several approaches using universal quantification. We tried defining heaps to be isomorphic if all pairs of paths that lead to related addresses in one heap also lead to related addresses in the other. We tried several approaches for limiting which, and what depth of paths should be considered by the solver. But the underlying doubly exponential complexity of comparing all pairs of paths impedes the applicability of that approach. The requirement that disjoint heap effects of procedure calls commute was an important design force: many alternative approaches required extensive additional axioms to handle the various cases, whereas our current approach of enumerating allocators seems to handle many cases naturally.
 
+\subsection{Examples}
+
+
+There are a collection of programs available from \url{https://github.com/lexicalscope/ape#automatic-procedure-equivalence-tool} that show the capabilities of \tool{}. Several of them have been listed in \cref{fig:progs} with timings performed on an {\bf TIM:state the clock speed and the number of cores. The data structures passed have 10? 100? 1000? elements in them. The first program gives the timing of an empty program to show the overhead of just calling \tool{} (and Z3).
+}
+
+\begin{figure}[htbp]
+\centering%
+\begin{tabular}{| l | c |  }
+
+\hline	
+  {\bf Description} & {\bf Timing}\\
+\hline
+  Empty program & xx \\		
+  Change order of allocation & xx  \\
+  Change amount of garbage allocated & xx  \\
+  Making the same procedures calls & xx \\
+  Isomorphism of heap reachable from call parameters & xx \\
+  Allocations moved past calls & xx\\
+  Recursive calls reordered & xx\\
+  Copying a cyclic data structure & 4s \\
+  Inserting a row into a table  & 31s \\
+  Copying a list & 7s \\
+  Copying a tree & 130s  \\
+  \hline  
+
+\end{tabular}
+\caption{Examples with timings}\label{fig:progs}
+\end{figure}
 \metho{}'s approach of using equality to establish isomorphism does prevent \tool{} from establishing isomorphism in some cases where it would be helpful to do so. The example in \cref{fig:listex} is from a refactoring of some code which manipulates a doubly linked list. Both procedures add an element to a list, but first remove it if it is already present. The left procedure has a redundant check that the item is in the list, in the right procedure this redundancy is removed.
 
 The isomorphism between lines~\ref{lst:listex find one} and~\ref{lst:listex' find} relates the addresses in \texttt{rf0} and \texttt{rf}. The isomorphism between lines~\ref{lst:listex find two} and~\ref{lst:listex' find} relates the addresses in \texttt{rf1} and \texttt{rf}. If we were to assume equality for both of these isomorphisms then we would have $\texttt{rf} = \texttt{rf0} = \texttt{rf1}$. However, \texttt{rf0} is allocated by the \texttt{new} statement on line~\ref{lst:listex new one} whereas \texttt{rf1} is allocated by the subsequent \texttt{new} statement on line~\ref{lst:listex new two}. The semantics of \texttt{new} require that each allocation gives an address which was not previously allocated --- \ie that $\texttt{rf0} \neq \texttt{rf1}$.
