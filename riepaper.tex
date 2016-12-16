@@ -1103,19 +1103,20 @@ $\heapof{\store}\defeq h$ and $\stackof{\store}\defeq \stack\cdot\stackf$ and $\
 \caption{Procedure call and composition rules of \lang{}}\label{fig:bl call and compose}
 \end{figure*}
 
-\lang{} is a simple imperative language. \Cref{fig:bl-op-sem} describes the standard aspects of \lang{}, while \cref{fig:bl call and compose} describes the non-standard aspects.
+\lang{} is a simple imperative language. \Cref{fig:bl-op-sem} describes the standard aspects of \lang{}, while \cref{fig:bl call and compose} describes the non-standard aspects. The following points are interesting about our semantics: 
+\begin{itemize}
+\item  We distinguish between execution under $\Vsemantics$ and $\Asemantics$ with a subscript, writing $\exeEither$ where $\metasem \in \{\Vsemantics,\Asemantics\}$.
+\item We split procedure call into two: a ``call'' rule and a ``body'' rule, similar to \citeauthor{Godlin09}~\cite{Godlin09}, to treat procedure call concretely in $\Vsemantics$ but abstractly in $\Asemantics$. The latter is a first ingredient in reflecting mutual summaries.
+\item Execution of pairs of procedures is included in the operational semantics, modelled by the rules \composeRuleVerified{} and \composeRuleAbstract{}: \[\store_1,s_1 \parcomp \store_2,s_2 \exeEither[\tr_1,\tr_2] \store_3 \parcomp \store_4\] meaning statement $s_1$ executed on store $\store_1$ results in store $\store_3$ producing trace $\tr_1$, and similarly for statement $s_2$. These rules reflect product programs~\cite{Lahiri2012,Barthe2016,Banerjee2016}.
+\item We require the program adhere to a specification given by $\Contract$\footnote{We expect single program contracts to have been verified; programs with no contracts are also acceptable.}.
+\item The semantics are instrumented to produce a trace of the states reached during execution which we use to distinguish particular executions.
+\item although our semantics is a big step semantics, we keep the whole calling context as part of the runtime configuration to allow us to give useful meaning to isomorphism of stores.
+\item We assume loops will been encoded as recursive procedures.
+\end{itemize}
 
-The following points are interesting about our semantics: \textbf{First}, we distinguish between execution under $\Vsemantics$ and $\Asemantics$ with a subscript, writing $\exeEither$ where $\metasem \in \{\Vsemantics,\Asemantics\}$.
-\textbf{Second}, we split procedure call into two: a ``call'' rule and a ``body'' rule, similar to \citeauthor{Godlin09}~\cite{Godlin09}, to treat procedure call concretely in $\Vsemantics$ but abstractly in $\Asemantics$. The latter is a first ingredient in reflecting mutual summaries.
-\textbf{Third}, execution of pairs of procedures is included in the operational semantics, modelled by the rules \composeRuleVerified{} and \composeRuleAbstract{}: \[\store_1,s_1 \parcomp \store_2,s_2 \exeEither[\tr_1,\tr_2] \store_3 \parcomp \store_4\] meaning statement $s_1$ executed on store $\store_1$ results in store $\store_3$ producing trace $\tr_1$, and similarly for statement $s_2$. These rules reflect product programs~\cite{Lahiri2012,Barthe2016,Banerjee2016}.
-\textbf{Fourth}, we require the program adhere to a specification given by $\Contract$\footnote{We expect single program contracts to have been verified; programs with no contracts are also acceptable.}.
-\textbf{Fifth}, the semantics are instrumented to produce a trace of the states reached during execution which we use to distinguish particular executions.
-\textbf{Sixth}, although our semantics is a big step semantics, we keep the whole calling context as part of the runtime configuration to allow us to give useful meaning to isomorphism of stores.
-\textbf{Seventh}, we assume loops will been encoded as recursive procedures.
+We only discuss some of the rules of the operational semantics. \blNew{} allocates a new object.\footnote{In a concrete implementation we do not require that there is no garbage collection, just that the programmer cannot manipulate addresses.} The address of the object must be fresh, and the object has all fields set to \texttt{null}. \blAssign{} updates a stack variable $x$ with the result of evaluating an expression $e$ in the store $\store$.
 
-We only discuss some of the rules of the operational semantics. \blNew{} allocates a new object. The address of the object must be fresh, and the object has all fields set to \texttt{null}. \blAssign{} updates a stack variable $x$ with the result of evaluating an expression $e$ in the store $\store$.
-
-\bodyRule{} executes the body of a procedure \texttt{\fun} by looking up and executing \texttt{\fun}'s statements. Our assumption that procedure contracts have already been verified is modelled by the requirement $(\store_1,\store_3) \in \Contract(\fun)$. Note that \bodyRule{} pops the top of the final stack, while \callRuleAbstract{} and \callRuleVerified{} push new frames (using the function $\mkframe$).
+\bodyRule{} executes the body of a procedure \texttt{\fun} by looking up and executing \texttt{\fun}'s statements. Our assumption that procedure contracts have already been verified, is modelled by the requirement $(\store_1,\store_3) \in \Contract(\fun)$. Note that \bodyRule{} pops the top of the final stack, while \callRuleAbstract{} and \callRuleVerified{} push new frames (using the function $\mkframe$).
 
 \callRuleAbstract{} models abstraction of procedure calls. The behaviour of the abstracted call is restricted by the procedure's contract $\Contract(\fun)$, and the call may not free any allocated address (\lang{} never frees or reuses allocated memory).
 
