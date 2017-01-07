@@ -1432,7 +1432,7 @@ We considered many alternative approaches to establishing isomorphism. The natur
 \subsection{Examples}
 
 
-There are a collection of programs available from \url{https://github.com/lexicalscope/ape#automatic-procedure-equivalence-tool} that show the capabilities of \tool{}. Several of them have been listed in \cref{fig:progs} with timings performed on an {\bf TIM:state the clock speed and the number of cores. The first program gives the timing of an empty program to show the overhead of just calling \tool{} (and Z3).
+There are a collection of programs available from \url{https://github.com/lexicalscope/ape#automatic-procedure-equivalence-tool} that show the capabilities of \tool{}. Several of them have been listed in \cref{fig:progs} with timings performed on an Intel Core i5-3210M@2.5GHz processor with 8GB memory. {\bf TIM:state the clock speed and the number of cores. The first program gives the timing of an empty program to show the overhead of just calling \tool{} (and Z3).
 }
 
 \begin{figure}[htbp]
@@ -1442,13 +1442,13 @@ There are a collection of programs available from \url{https://github.com/lexica
 \hline	
   {\bf Description} & {\bf Timing}\\
 \hline
-  Empty program & xx \\		
-  Change order of allocation & xx  \\
-  Change amount of garbage allocated & xx  \\
-  Making the same procedures calls & xx \\
-  Isomorphism of heap reachable from call parameters & xx \\
-  Allocations moved past calls & xx\\
-  Recursive calls reordered & xx\\
+  Empty program & 1.5s \\		
+  Change order of allocation & 1.5s  \\
+  Change amount of garbage allocated & 1.5s  \\
+  Making the same procedures calls & 1.5s \\
+  Isomorphism of heap reachable from call parameters & 1.8s \\
+  Allocations moved past calls & 1.5s \\
+  Recursive calls reordered & 8s \\
   Copying a cyclic data structure & 4s \\
   Inserting a row into a table  & 31s \\
   Copying a list & 7s \\
