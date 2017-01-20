@@ -1141,7 +1141,7 @@ Stores are isomorphic if they differ only in the actual values of heap addresses
 		   \setcomp{\store_1[i](x)\mapsto\store_2[i](x)}{x \in \domain{\store_1[i]} \band i \le \cardinality{\store_1}} \cup \\
 		   &\setcomp{\store_1(a,f)\mapsto\store_2(\pi(a),f)}{a \in \domain{\pi}}
 		\end{aligned}\]
-	And $\piv \defeq [\nullv\mapsto\nullv, \truev\mapsto\truev, \falsev\mapsto\falsev]$
+	And $\piv \defeq [\mathrm{\emph{\nullv}}\mapsto\mathrm{\emph{\nullv}}, \mathrm{\emph{\truev}}\mapsto\mathrm{\emph{\truev}}, \mathrm{\emph{\falsev}}\mapsto\mathrm{\emph{\falsev}}]$
 \end{definition}
 
 In our notation: The number of stack frames in store $\store$ is $\cardinality{\store}$. The value of variable $x$ in the $i^{\textit{th}}$ stack frame is $\store[i](x)$. The domain of the mapping $\pi$ is $\domain{\pi}$, and $\domain{\store[i]}$ is the set of variables defined in the $i^{\textit{th}}$ stack frame.
