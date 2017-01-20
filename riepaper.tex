@@ -932,8 +932,8 @@ axiom (forall $strat:int,$h_pre_0,$h_post_0,$h_pre_1,$h_post_1:Heap,Â£\label{l
         t_0,r_0,t_1,r_1:Ref ::Â£\label{lst:summary axiom}Â£
  {$abs_lcopy($strat,$h_pre_0, t_0, r_0, $h_post_0),Â£\label{lst:trigger start}Â£
   $abs_rcopy($strat,$h_pre_1, t_1, r_1, $h_post_1)}Â£\label{lst:trigger end}Â£
- $abs_lcopy($h_pre_0, t_0, r_0, $h_post_0) &&
- $abs_rcopy($h_pre_1, t_1, r_1, $h_post_1)
+ $abs_lcopy($strat,$h_pre_0, t_0, r_0, $h_post_0) &&
+ $abs_rcopy($strat,$h_pre_1, t_1, r_1, $h_post_1)
   && $Heap#EqualFromParams($h_pre_0, t_0, r_0, $h_pre_1, t_1, r_1)  Â£\label{lst:summary axiom antecedent}Â£
    ==> $SameDiff($h_pre_0, $h_post_0, $h_pre_1, $h_post_1));Â£\label{lst:summary axiom consequent}\label{lst:summary axiom end}Â£
 function $SameDiff($h_pre_0, $h_post_0, $h_pre_1, $h_post_1:Heap) : bool {Â£\label{lst:samediff}Â£
