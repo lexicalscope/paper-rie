@@ -975,7 +975,7 @@ We start with an overview of the semantics of \lang{}, then define isomorphism a
 
 \begin{figure*}[htbp]
 \begin{tabularx}{\linewidth}{ l l X }
-	\grammarrow{s_a \in \AtomicStatement}{ $x := e$ | $x := b$ | $x := \news()$ | $\assume~b$ | $\assert~b$ | $\call~\fun(x,\dots,x)$ | $e.f := e$ }
+	\grammarrow{s_a \in \AtomicStatement}{ $x := e$ | $x := \news()$ | $\assume~b$ | $\assert~b$ | $\call~\fun(x,\dots,x)$ | $e.f := e$ }
 	\grammarrow{s \in \Statement}{ $s_a$ | $\guard{b}{s_a}$ | $s;s$ }
 	\grammarrow{e \in \ScalarExpr}{ $\nullv$ | $x$ | $e.f$ | $b$ }
 	\grammarrow{b \in \BoolExpr}{ $x=y$ | $!b$ | $b \band b$ | $\truev$ | $\falsev$ }
