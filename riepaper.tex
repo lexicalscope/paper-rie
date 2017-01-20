@@ -946,7 +946,7 @@ function $SameDiff($h_pre_0, $h_post_0, $h_pre_1, $h_post_1:Heap) : bool {Â£\l
 \caption{Mutual summary of the \texttt{lcopy} and \texttt{rcopy} procedures. Written in Boogie.}\label{fig:mutual summary}
 \end{figure}
 
-Equivalent procedure calls do not always occur from isomorphic stores (\textbf{\ctwo{}}). This is overcome by considering only the region of the heap reachable from the procedure parameters when trying to establish equivalence of procedure calls. This corresponds to the predicate \texttt{\$Heap\#EqualFromParams} on \cref{lst:summary axiom antecedent}, detailed in \Cref{sec:extensionality}.
+Equivalent procedure calls do not always occur from isomorphic stores (\textbf{\ctwo{}}). This is overcome by considering only the region of the heap reachable from the procedure parameters when trying to establish equivalence of procedure calls. This corresponds to the predicate \texttt{\$Heap\#EqualFromParams} on \cref{lst:summary axiom antecedent}, detailed in \Cref{sec:mutual}.
 
 Equivalent procedure calls do not necessarily result in isomorphic stores (\textbf{\cthree}). This is overcome through our choice of procedure summary (\cref{lst:summary axiom consequent}) and a frame axiom. The write effects of a pair of equivalent procedure calls are related by the predicate \texttt{\$SameDiff} (\cref{lst:samediff}). The frame axiom appears as a free postcondition\footnote{A free postcondition may be assumed after a call, but is not checked.} of every procedure (\cref{lst:frame axiom lr,lst:frame axiom rl}).  Both are described below.
 
@@ -1266,7 +1266,7 @@ Predicate $\isoR$ (\Cref{def:my compatible isomorphic states}) retains only trac
 
 \Cref{def:isomorphic points} requires that the points are selected symmetrically for isomorphic traces. This symmetry is critical for the soundness of \metho{}, which must verify at least one pair of execution traces for each initial state. Furthermore, the definition requires that the union of the isomorphisms between the selected heap regions is an injection. This corresponds to the fact that \metho{} is implemented by equating allocation sites, and will be discussed further in later sections, particularly \Cref{sec:discussion}.
 
-\subsection{Mutual Summaries of Equivalent Procedures}
+\subsection{Mutual Summaries of Equivalent Procedures}\label{sec:mutual}
 
 \tool{} uses mutual summaries, \cref{lst:summary axiom start,lst:summary axiom end} in \Cref{fig:mutual summary}, to allow the verifier to use facts about the behaviour of equivalent procedure calls in its proofs. It is needed in order for procedure equivalence to be a transitive relation.
 
