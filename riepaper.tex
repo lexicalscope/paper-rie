@@ -900,7 +900,7 @@ function $Reachable($h:Heap, $roots:Roots, $a:Ref) : bool {
 \caption{Extensional equality of the reachable heap region. Written in Boogie.}\label{fig:extensionality}
 \end{figure}
 
-\Tool{} uses the extensional axiomatisation of heap equality shown in \Cref{fig:extensionality}. The axiomatisation allows procedures to create different garbage by only requiring equality of the reachable heap. The parameter \texttt{\$roots} is a set of references, and it overapproximates the references that are on the stack. The predicate \texttt{\$Reachable} is an axiomatisation of heap reachability and is discussed in \Cref{sec:reachability}.
+\Tool{} uses the extensional axiomatisation of heap equality shown in \Cref{fig:extensionality}. The axiomatisation allows procedures to create different garbage by only requiring equality of the reachable heap. The parameter \texttt{\$roots} is a set of references, and it overapproximates the references that are on the stack. The predicate \texttt{\$Reachable} is an axiomatisation of heap reachability (something is unreachable when in a disjoint part of the heap) and is discussed in \Cref{sec:reachability}.
 
 We define equality between heaps using a pair of implications that say that if an object is reachable in either heap, its fields must be equal in both heaps. An alternative, and perhaps more obvious, definition would be that the reachable sets are equal, and that each object in the reachable set has equal fields in both the heaps. The definitions are equivalent --- since heaps that are equal in their reachable parts have the same reachability relation. On several examples the solver was unable to prove that the reachable sets are equal, but it is able to prove our definition.
 
