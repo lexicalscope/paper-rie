@@ -730,7 +730,7 @@ Symdiff relates heaps using equality (of arrays modelling the heaps), which we w
  \emph{Two procedures are {\em equivalent}, if they terminate for the same set of initial stores, and if both procedures run to completion from isomorphic initial stores, they result in isomorphic final stores}. 
  \end{quote}
  Our definition of equivalence matches intuition: it allows for differences in the order or amount of memory allocation and garbage and is not restricted to tree-like structures.
-Achieving automatic verification presents several challenges:
+Achieving automatic and modular verification presents several challenges:
 \begin{description}
 \item[\Cone{}]What kind of input do we need to give to an SMT solver so that it can even do the verification? We need to establish an isomorphism between unbounded heaps of arbitrary shape when this is computationally infeasible in general. Furthermore, a direct axiomatisation of isomorphism involves existentially quantifying the mapping between memory locations that characterises the isomorphism. SMT based verification systems are not very good at producing witnesses to such existentials and so a direct axiomatisation of isomorphism is ineffective.
 \end{description}
