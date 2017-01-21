@@ -741,7 +741,7 @@ Sometimes calls to equivalent procedures occur from stores that are not fully is
 
 \item[\Cthree{}]What should we do about equivalent calls from non-isomorphic stores since they do not necessarily result in isomorphic stores?
 
-\item[\Cfour{}]How do we decide which calls may be equivalent when there may be many possible candidates? Equivalent calls may not occur in the same order in each procedure, and moreover the procedure calls which correspond may differ from execution to execution depending on the initial state (\ie program inputs).
+\item[\Cfour{}]How do we decide which calls are equivalent when there may be many possible candidates? Equivalent calls may occur in different orders in each procedure, and moreover the procedure calls which correspond may differ from execution to execution depending on the initial state (\ie program inputs).
 \end{description}
 %
 %\textbf{\Cone{}}. What kind of input do we need to give to an SMT solver so that it can even do the verification? We need to establish an isomorphism between unbounded heaps of arbitrary shape when this is computationally infeasible in general. Furthermore, a direct axiomatisation of isomorphism involves existentially quantifying the mapping between memory locations that characterises the isomorphism. SMT based verification systems are not very good at producing witnesses to such existentials and so a direct axiomatisation of isomorphism is ineffective.
