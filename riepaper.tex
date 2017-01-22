@@ -1437,27 +1437,27 @@ There are a collection of programs available from \url{https://github.com/lexica
 
 \begin{figure}[htbp]
 \centering%
-\begin{tabular}{| l | c |  }
+\begin{tabular}{| l | c | c |}
 
 \hline	
-  {\bf Description} & {\bf Timing}\\
+  {\bf Description} & {\bf Allocations} & {\bf Timing}\\
 \hline
-  Empty program & 1.5s \\		
-  Change order of allocation & 1.5s  \\
-  Change amount of garbage allocated & 1.5s  \\
-  Making the same procedures calls & 1.5s \\
-  Isomorphism of heap reachable from call parameters & 1.8s \\
-  Allocations moved past calls & 1.5s \\
-  Recursive calls reordered & 8s \\
-  Copying a cyclic data structure & 4s \\
-  Inserting a row into a table  & 31s \\
-  Copying a list & 7s \\
-  Copying a tree with calls same order & 84s  \\
-  Copying a tree with calls reordered & 130s  \\
+  Empty program & 0 & 1.5s \\		
+  Making the same procedures calls & 0 & 1.5s \\
+  Change amount of garbage allocated & 1 & 1.5s  \\
+  Allocations moved past calls & 1 & 1.5s \\
+  Change order of allocation & 2 & 1.5s  \\
+  Isomorphism of heap reachable from call parameters & 2 & 1.8s \\
+  Recursive calls reordered & 2 & 8s \\
+  Copying a cyclic data structure & 2 & 4s \\
+  Inserting a row into a table  & 2 & 31s \\
+  Copying a list & 2 & 7s \\
+  Copying a tree with calls same order & 3 & 84s  \\
+  Copying a tree with calls reordered & 3 & 130s  \\
   \hline  
 
 \end{tabular}
-\caption{Examples with timings}\label{fig:progs}
+\caption{Examples with the maximum number of allocations per procedure and timings}\label{fig:progs}
 \end{figure}
 
 We surmise that the amount of time APE takes to verify an example is related to the number of allocations, the number of paths through the procedure, the number of procedure calls, the complexity of any framing reachability that needs to be solved, and the order that Z3 happens to apply the axioms (\ie how far into the search space the solution lies --- for example, reordering procedure calls usually slows the verification down).
